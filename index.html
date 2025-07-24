@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台語音節計算器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .upload-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .text-input {
+            width: 100%;
+            min-height: 200px;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .analyze-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto 30px;
+        }
+        
+        .analyze-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .results {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .file-result {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .file-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .syllable-count {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .total-result {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .total-count {
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .example {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .example h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .example-text {
+            font-family: monospace;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            border-left: 3px solid #667eea;
+        }
+        
+        .clear-button {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-button:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>台語音節計算器</h1>
+        
+        <div class="example">
+            <h3>使用說明與範例：</h3>
+            <div class="example-text">Hit隻ka-choa̍h雄雄chông--出-來。 → 9個音節</div>
+            <div class="example-text">Î-cheng驚kah peh起去椅仔大聲哀。 → 12個音節</div>
+            <p style="margin-top: 10px; color: #666;">
+                • 漢字算一個音節<br>
+                • 羅馬拼音以連字號(-)分隔的每段算一個音節<br>
+                • -- 和 - 是分音節符號，不計入字數<br>
+                • 忽略所有標點符號
+            </p>
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <p style="font-size: 18px; color: #666; margin-bottom: 20px;">
+                拖放Word檔案到此處，或點擊按鈕選擇檔案
+            </p>
+            <button class="upload-button" onclick="document.getElementById('fileInput').click()">
+                選擇Word檔案
+            </button>
+            <input type="file" id="fileInput" class="file-input" multiple accept=".docx,.doc">
+        </div>
+        
+        <div>
+            <h3 style="margin-bottom: 15px; color: #333;">或直接輸入文字：</h3>
+            <textarea class="text-input" id="textInput" placeholder="在此輸入台語文字..."></textarea>
+            <button class="analyze-button" onclick="analyzeText()">分析音節數量</button>
+            <button class="clear-button" onclick="clearAll()">清除所有</button>
+        </div>
+        
+        <div id="results" class="results" style="display: none;">
+            <h3 style="margin-bottom: 20px; color: #333;">分析結果：</h3>
+            <div id="fileResults"></div>
+            <div id="totalResult" class="total-result">
+                <div style="font-size: 20px;">總音節數</div>
+                <div id="totalCount" class="total-count">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let fileResults = [];
+        
+        // 音節計算函數
+        function countSyllables(text) {
+            // 移除所有全形和半形標點符號
+            const punctuations = /[。，、；：！？""''（）【】《》〈〉「」『』.,;:!?"'()\[\]{}<>]/g;
+            text = text.replace(punctuations, '');
+            
+            // 移除分音節符號 -- 和單獨的 -（但保留羅馬拼音中的連字號）
+            text = text.replace(/--/g, ' '); // 先處理雙連字號
+            
+            // 分割文字為tokens
+            let tokens = [];
+            let currentToken = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                
+                if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
+                    if (currentToken.trim()) {
+                        tokens.push(currentToken.trim());
+                        currentToken = '';
+                    }
+                } else {
+                    currentToken += char;
+                }
+            }
+            
+            if (currentToken.trim()) {
+                tokens.push(currentToken.trim());
+            }
+            
+            let syllableCount = 0;
+            
+            for (let token of tokens) {
+                if (!token) continue;
+                
+                let tokenSyllables = 0;
+                let i = 0;
+                
+                while (i < token.length) {
+                    const char = token[i];
+                    
+                    // 檢查是否為漢字
+                    if (isChineseChar(char)) {
+                        tokenSyllables++;
+                        i++;
+                    }
+                    // 檢查是否為羅馬字母開始的拼音
+                    else if (isLatinChar(char)) {
+                        // 找到羅馬拼音的結束位置
+                        let romanEnd = i;
+                        while (romanEnd < token.length && 
+                               (isLatinChar(token[romanEnd]) || 
+                                isDiacritic(token[romanEnd]) || 
+                                token[romanEnd] === '-')) {
+                            romanEnd++;
+                        }
+                        
+                        const romanText = token.substring(i, romanEnd);
+                        
+                        // 處理單獨的 - 符號（在開頭或結尾）
+                        if (romanText === '-') {
+                            i = romanEnd;
+                            continue;
+                        }
+                        
+                        // 計算羅馬拼音的音節數（以-分隔）
+                        const parts = romanText.split('-').filter(part => part.length > 0);
+                        tokenSyllables += parts.length;
+                        
+                        i = romanEnd;
+                    }
+                    // 其他字符（數字、符號等）也算一個音節
+                    else if (char !== '-') {
+                        tokenSyllables++;
+                        i++;
+                    } else {
+                        i++;
+                    }
+                }
+                
+                syllableCount += tokenSyllables;
+            }
+            
+            return syllableCount;
+        }
+        
+        // 判斷是否為漢字
+        function isChineseChar(char) {
+            const code = char.charCodeAt(0);
+            return (code >= 0x4e00 && code <= 0x9fff) || 
+                   (code >= 0x3400 && code <= 0x4dbf) ||
+                   (code >= 0x20000 && code <= 0x2a6df);
+        }
+        
+        // 判斷是否為拉丁字母
+        function isLatinChar(char) {
+            const code = char.charCodeAt(0);
+            return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+        }
+        
+        // 判斷是否為變音符號
+        function isDiacritic(char) {
+            const code = char.charCodeAt(0);
+            return (code >= 0x0300 && code <= 0x036f) || // 組合變音符號
+                   (code >= 0x1e00 && code <= 0x1eff) || // 拉丁擴展附加
+                   char === 'ā' || char === 'á' || char === 'à' || char === 'ă' || char === 'ã' ||
+                   char === 'ē' || char === 'é' || char === 'è' || char === 'ě' || char === 'ê' ||
+                   char === 'ī' || char === 'í' || char === 'ì' || char === 'î' ||
+                   char === 'ō' || char === 'ó' || char === 'ò' || char === 'ô' || char === 'ő' ||
+                   char === 'ū' || char === 'ú' || char === 'ù' || char === 'û' ||
+                   char === 'ň' || char === 'ñ' || char === 'ǹ' || char === 'ń' ||
+                   char === 'ḿ' || char === 'ṁ' || char === 'ṃ' ||
+                   char === 'ṅ' || char === 'ṇ' ||
+                   char === 'ḷ' || char === 'ḹ' ||
+                   char === 'ḥ' || char === 'ḩ' ||
+                   char === 'ȯ' || char === 'ṏ' ||
+                   char === 'o͘' || char === 'a̍' || char === 'e̍' || char === 'i̍' || char === 'o̍' || char === 'u̍' ||
+                   char === 'ⁿ' || char === '̍' || char === '̂' || char === '̃' || char === '̄' || char === '̀' || char === '́';
+        }
+        
+        // 檔案上傳處理
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+        
+        // 處理檔案
+        async function handleFiles(files) {
+            for (let file of files) {
+                if (file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
+                    try {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
+                        const text = result.value;
+                        const syllables = countSyllables(text);
+                        
+                        fileResults.push({
+                            name: file.name,
+                            syllables: syllables,
+                            text: text
+                        });
+                        
+                        updateResults();
+                    } catch (error) {
+                        alert(`處理檔案 ${file.name} 時發生錯誤: ${error.message}`);
+                    }
+                } else {
+                    alert(`檔案 ${file.name} 不是支援的Word檔案格式`);
+                }
+            }
+        }
+        
+        // 分析文字輸入
+        function analyzeText() {
+            const textInput = document.getElementById('textInput');
+            const text = textInput.value.trim();
+            
+            if (!text) {
+                alert('請輸入要分析的文字');
+                return;
+            }
+            
+            const syllables = countSyllables(text);
+            
+            fileResults.push({
+                name: '直接輸入的文字',
+                syllables: syllables,
+                text: text
+            });
+            
+            updateResults();
+        }
+        
+        // 更新結果顯示
+        function updateResults() {
+            const resultsDiv = document.getElementById('results');
+            const fileResultsDiv = document.getElementById('fileResults');
+            const totalCountDiv = document.getElementById('totalCount');
+            
+            fileResultsDiv.innerHTML = '';
+            let totalSyllables = 0;
+            
+            fileResults.forEach((result, index) => {
+                totalSyllables += result.syllables;
+                
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'file-result';
+                resultDiv.innerHTML = `
+                    <div class="file-name">${result.name}</div>
+                    <div class="syllable-count">${result.syllables} 個音節</div>
+                    <button class="clear-button" onclick="removeResult(${index})" style="margin-top: 10px;">移除</button>
+                `;
+                fileResultsDiv.appendChild(resultDiv);
+            });
+            
+            totalCountDiv.textContent = totalSyllables;
+            resultsDiv.style.display = fileResults.length > 0 ? 'block' : 'none';
+        }
+        
+        // 移除單個結果
+        function removeResult(index) {
+            fileResults.splice(index, 1);
+            updateResults();
+        }
+        
+        // 清除所有結果
+        function clearAll() {
+            fileResults = [];
+            document.getElementById('textInput').value = '';
+            document.getElementById('fileInput').value = '';
+            updateResults();
+        }
+    </script>
+</body>
+</html>
