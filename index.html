@@ -346,9 +346,10 @@
             const code = char.charCodeAt(0);
             return (code >= 65 && code <= 90) || // A-Z
                    (code >= 97 && code <= 122) || // a-z
-                   (code >= 192 && code <= 255) || // 拉丁擴展A
-                   (code >= 256 && code <= 383) || // 拉丁擴展B
+                   (code >= 192 && code <= 255) || // 拉丁擴展A (À-ÿ)
+                   (code >= 256 && code <= 383) || // 拉丁擴展B (Ā-ſ)
                    (code >= 0x1e00 && code <= 0x1eff) || // 拉丁擴展附加
+                   (code >= 0x0100 && code <= 0x017f) || // 拉丁擴展A
                    isDiacritic(char);
         }
         
@@ -358,8 +359,8 @@
             // 組合變音符號
             if (code >= 0x0300 && code <= 0x036f) return true;
             
-            // 常見的台語羅馬拼音變音字母
-            const diacriticChars = 'āáàăãāêēéèěêīíìîōóòôőūúùûňñǹńḿṁṃṅṇḷḹḥḩȯṏâ';
+            // 常見的台語羅馬拼音變音字母（擴展清單）
+            const diacriticChars = 'āáàăãǎâēéèěêīíìǐîōóòǒôőūúùǔûňñǹńḿṁṃṅṇḷḹḥḩȯṏ';
             return diacriticChars.includes(char) || 
                    char.includes('o͘') || 
                    char.includes('a̍') || char.includes('e̍') || 
