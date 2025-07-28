@@ -144,10 +144,55 @@
             font-size: 18px;
         }
         
-        .syllable-count {
-            font-size: 24px;
-            color: #667eea;
+        .count-details {
+            margin-top: 10px;
+        }
+        
+        .count-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px 0;
+        }
+        
+        .count-label {
+            font-weight: normal;
+            color: #666;
+        }
+        
+        .count-value {
             font-weight: bold;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .total-item {
+            border-top: 2px solid #667eea;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+        
+        .total-item .count-value {
+            color: #667eea;
+            font-size: 20px;
+        }
+        
+        .total-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .total-breakdown .total-item {
+            font-size: 18px;
+            padding: 8px 0;
+        }
+        
+        .grand-total {
+            font-size: 24px !important;
+            font-weight: bold;
+            color: white;
+            border-top: 2px solid rgba(255,255,255,0.3);
         }
         
         .total-result {
@@ -160,8 +205,6 @@
         }
         
         .total-count {
-            font-size: 36px;
-            font-weight: bold;
             margin-top: 10px;
         }
         
@@ -209,17 +252,18 @@
         
         <div class="example">
             <h3>使用說明與範例：</h3>
-            <div class="example-text">Hit隻ka-choa̍h雄雄chông--出-來。 → 9個音節</div>
-            <div class="example-text">Î-cheng驚kah peh起去椅仔大聲哀。 → 12個音節</div>
-            <div class="example-text">12ê囡仔leh thit-thô → 8個音節</div>
-            <div class="example-text">hiah gâu → 2個音節</div>
-            <div class="example-text">A-lâm → 2個音節</div>
+            <div class="example-text">Hit隻ka-choa̍h雄雄chông--出-來。 → 音節：9、標點：1、總和：10</div>
+            <div class="example-text">Î-cheng驚kah peh起去椅仔大聲哀。 → 音節：12、標點：1、總和：13</div>
+            <div class="example-text">12ê囡仔leh thit-thô → 音節：8、標點：0、總和：8</div>
+            <div class="example-text">hiah gâu → 音節：2、標點：0、總和：2</div>
+            <div class="example-text">A-lâm → 音節：2、標點：0、總和：2</div>
             <p style="margin-top: 10px; color: #666;">
                 • 漢字算一個音節<br>
                 • 羅馬拼音以連字號(-)分隔的每段算一個音節<br>
                 • 數字每個字符算一個音節<br>
+                • 標點符號單獨計算（不包含全形空白）<br>
                 • -- 和 - 是分音節符號，不計入字數<br>
-                • 忽略所有標點符號
+                • 最終結果顯示：音節數 + 標點數 = 總和
             </p>
         </div>
         
@@ -244,8 +288,8 @@
             <h3 style="margin-bottom: 20px; color: #333;">分析結果：</h3>
             <div id="fileResults"></div>
             <div id="totalResult" class="total-result">
-                <div style="font-size: 20px;">總音節數</div>
-                <div id="totalCount" class="total-count">0</div>
+                <div style="font-size: 20px;">總計統計</div>
+                <div id="totalCount" class="total-count"></div>
             </div>
         </div>
     </div>
@@ -257,9 +301,18 @@
         function countSyllables(text) {
             console.log('原始文字:', text);
             
-            // 移除所有全形和半形標點符號，以及全形空白
-            const punctuations = /[。，、；：！？""''（）【】《》〈〉「」『』.,;:!?"'()\[\]{}<>　]/g;
-            text = text.replace(punctuations, '');
+            const originalText = text;
+            
+            // 計算標點符號數量（排除全形空白和分音節符號）
+            const punctuationRegex = /[。，、；：！？""''（）【】《》〈〉「」『』.,;:!?"'()\[\]{}<>]/g;
+            const punctuationMatches = originalText.match(punctuationRegex) || [];
+            const punctuationCount = punctuationMatches.length;
+            console.log('找到的標點符號:', punctuationMatches);
+            console.log('標點符號數量:', punctuationCount);
+            
+            // 移除所有標點符號和全形空白用於音節計算
+            const allPunctuations = /[。，、；：！？""''（）【】《》〈〉「」『』.,;:!?"'()\[\]{}<>　]/g;
+            text = text.replace(allPunctuations, '');
             console.log('移除標點後:', text);
             
             // 移除分音節符號 -- 和單獨的 -（但保留羅馬拼音中的連字號）
@@ -329,8 +382,16 @@
                 syllableCount += wordSyllables;
             }
             
-            console.log('總音節數:', syllableCount);
-            return syllableCount;
+            const totalCount = syllableCount + punctuationCount;
+            console.log('音節數:', syllableCount);
+            console.log('標點數:', punctuationCount);
+            console.log('總和:', totalCount);
+            
+            return {
+                syllables: syllableCount,
+                punctuation: punctuationCount,
+                total: totalCount
+            };
         }
         
         // 判斷是否為漢字
@@ -400,11 +461,13 @@
                         const arrayBuffer = await file.arrayBuffer();
                         const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
                         const text = result.value;
-                        const syllables = countSyllables(text);
+                        const counts = countSyllables(text);
                         
                         fileResults.push({
                             name: file.name,
-                            syllables: syllables,
+                            syllables: counts.syllables,
+                            punctuation: counts.punctuation,
+                            total: counts.total,
                             text: text
                         });
                         
@@ -428,11 +491,13 @@
                 return;
             }
             
-            const syllables = countSyllables(text);
+            const counts = countSyllables(text);
             
             fileResults.push({
                 name: '直接輸入的文字',
-                syllables: syllables,
+                syllables: counts.syllables,
+                punctuation: counts.punctuation,
+                total: counts.total,
                 text: text
             });
             
@@ -447,21 +512,44 @@
             
             fileResultsDiv.innerHTML = '';
             let totalSyllables = 0;
+            let totalPunctuation = 0;
+            let grandTotal = 0;
             
             fileResults.forEach((result, index) => {
                 totalSyllables += result.syllables;
+                totalPunctuation += result.punctuation;
+                grandTotal += result.total;
                 
                 const resultDiv = document.createElement('div');
                 resultDiv.className = 'file-result';
                 resultDiv.innerHTML = `
                     <div class="file-name">${result.name}</div>
-                    <div class="syllable-count">${result.syllables} 個音節</div>
+                    <div class="count-details">
+                        <div class="count-item">
+                            <span class="count-label">音節數：</span>
+                            <span class="count-value">${result.syllables}</span>
+                        </div>
+                        <div class="count-item">
+                            <span class="count-label">標點數：</span>
+                            <span class="count-value">${result.punctuation}</span>
+                        </div>
+                        <div class="count-item total-item">
+                            <span class="count-label">總和：</span>
+                            <span class="count-value">${result.total}</span>
+                        </div>
+                    </div>
                     <button class="clear-button" onclick="removeResult(${index})" style="margin-top: 10px;">移除</button>
                 `;
                 fileResultsDiv.appendChild(resultDiv);
             });
             
-            totalCountDiv.textContent = totalSyllables;
+            totalCountDiv.innerHTML = `
+                <div class="total-breakdown">
+                    <div class="total-item">音節數：${totalSyllables}</div>
+                    <div class="total-item">標點數：${totalPunctuation}</div>
+                    <div class="total-item grand-total">總和：${grandTotal}</div>
+                </div>
+            `;
             resultsDiv.style.display = fileResults.length > 0 ? 'block' : 'none';
         }
         
