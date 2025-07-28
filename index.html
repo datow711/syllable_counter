@@ -255,48 +255,81 @@
         
         // 音節計算函數
         function countSyllables(text) {
+            console.log('原始文字:', text);
+            
             // 移除所有全形和半形標點符號，以及全形空白
             const punctuations = /[。，、；：！？""''（）【】《》〈〉「」『』.,;:!?"'()\[\]{}<>　]/g;
             text = text.replace(punctuations, '');
+            console.log('移除標點後:', text);
             
             // 移除分音節符號 -- 和單獨的 -（但保留羅馬拼音中的連字號）
             text = text.replace(/--/g, ' '); // 先處理雙連字號
+            console.log('處理--後:', text);
             
-            // 使用正規表達式分割為token，保持羅馬拼音的完整性
-            const tokenRegex = /[a-zA-Zāáàăãēéèěêīíìîōóòôőūúùûňñǹńḿṁṃṅṇḷḹḥḩȯṏo͘a̍e̍i̍o̍u̍ⁿ̍̂̃̄̀́-]+|[\u4e00-\u9fff\u3400-\u4dbf]|\d+|./g;
-            const matches = text.match(tokenRegex) || [];
-            const tokens = matches.filter(token => token.trim() && token !== '-');
+            // 將文字按空白分割成詞彙
+            const words = text.split(/\s+/).filter(word => word.length > 0);
+            console.log('分割後的詞彙:', words);
             
             let syllableCount = 0;
             
-            for (let token of tokens) {
-                if (!token) continue;
+            for (let word of words) {
+                let wordSyllables = 0;
+                let i = 0;
                 
-                // 檢查token類型
-                if (isChineseChar(token[0])) {
-                    // 漢字：每個字算一個音節
-                    for (let char of token) {
-                        if (isChineseChar(char)) {
-                            syllableCount++;
-                        }
+                while (i < word.length) {
+                    const char = word[i];
+                    
+                    // 檢查是否為漢字
+                    if (isChineseChar(char)) {
+                        wordSyllables++;
+                        i++;
                     }
-                } else if (isLatinChar(token[0])) {
-                    // 羅馬拼音：以連字號分隔計算音節
-                    const parts = token.split('-').filter(part => part.length > 0);
-                    syllableCount += parts.length;
-                } else if (/^\d+$/.test(token)) {
-                    // 純數字：每個數字字符算一個音節
-                    syllableCount += token.length;
-                } else {
-                    // 其他字符：每個字符算一個音節（除了-）
-                    for (let char of token) {
-                        if (char !== '-') {
-                            syllableCount++;
+                    // 檢查是否為羅馬字母開始的拼音
+                    else if (isLatinChar(char)) {
+                        // 找到整個羅馬拼音單位的結束位置
+                        let romanEnd = i;
+                        while (romanEnd < word.length && 
+                               (isLatinChar(word[romanEnd]) || 
+                                isDiacritic(word[romanEnd]) || 
+                                word[romanEnd] === '-')) {
+                            romanEnd++;
                         }
+                        
+                        const romanText = word.substring(i, romanEnd);
+                        console.log('找到羅馬拼音:', romanText);
+                        
+                        // 如果整個字串只是一個-，跳過
+                        if (romanText === '-') {
+                            i = romanEnd;
+                            continue;
+                        }
+                        
+                        // 計算羅馬拼音的音節數（以-分隔，但要排除空字串）
+                        const parts = romanText.split('-').filter(part => part.length > 0);
+                        console.log('羅馬拼音分割:', parts);
+                        wordSyllables += parts.length;
+                        
+                        i = romanEnd;
+                    }
+                    // 檢查是否為數字
+                    else if (char >= '0' && char <= '9') {
+                        wordSyllables++;
+                        i++;
+                    }
+                    // 其他字符也算一個音節（除了單獨的-）
+                    else if (char !== '-') {
+                        wordSyllables++;
+                        i++;
+                    } else {
+                        i++;
                     }
                 }
+                
+                console.log(`詞彙 "${word}" 的音節數:`, wordSyllables);
+                syllableCount += wordSyllables;
             }
             
+            console.log('總音節數:', syllableCount);
             return syllableCount;
         }
         
@@ -308,30 +341,30 @@
                    (code >= 0x20000 && code <= 0x2a6df);
         }
         
-        // 判斷是否為拉丁字母
+        // 判斷是否為拉丁字母（包含帶變音符號的字母）
         function isLatinChar(char) {
             const code = char.charCodeAt(0);
-            return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+            return (code >= 65 && code <= 90) || // A-Z
+                   (code >= 97 && code <= 122) || // a-z
+                   (code >= 192 && code <= 255) || // 拉丁擴展A
+                   (code >= 256 && code <= 383) || // 拉丁擴展B
+                   (code >= 0x1e00 && code <= 0x1eff) || // 拉丁擴展附加
+                   isDiacritic(char);
         }
         
-        // 判斷是否為變音符號
+        // 判斷是否為變音符號或帶變音符號的字母
         function isDiacritic(char) {
             const code = char.charCodeAt(0);
-            return (code >= 0x0300 && code <= 0x036f) || // 組合變音符號
-                   (code >= 0x1e00 && code <= 0x1eff) || // 拉丁擴展附加
-                   char === 'ā' || char === 'á' || char === 'à' || char === 'ă' || char === 'ã' ||
-                   char === 'ē' || char === 'é' || char === 'è' || char === 'ě' || char === 'ê' ||
-                   char === 'ī' || char === 'í' || char === 'ì' || char === 'î' ||
-                   char === 'ō' || char === 'ó' || char === 'ò' || char === 'ô' || char === 'ő' ||
-                   char === 'ū' || char === 'ú' || char === 'ù' || char === 'û' ||
-                   char === 'ň' || char === 'ñ' || char === 'ǹ' || char === 'ń' ||
-                   char === 'ḿ' || char === 'ṁ' || char === 'ṃ' ||
-                   char === 'ṅ' || char === 'ṇ' ||
-                   char === 'ḷ' || char === 'ḹ' ||
-                   char === 'ḥ' || char === 'ḩ' ||
-                   char === 'ȯ' || char === 'ṏ' ||
-                   char === 'o͘' || char === 'a̍' || char === 'e̍' || char === 'i̍' || char === 'o̍' || char === 'u̍' ||
-                   char === 'ⁿ' || char === '̍' || char === '̂' || char === '̃' || char === '̄' || char === '̀' || char === '́';
+            // 組合變音符號
+            if (code >= 0x0300 && code <= 0x036f) return true;
+            
+            // 常見的台語羅馬拼音變音字母
+            const diacriticChars = 'āáàăãāêēéèěêīíìîōóòôőūúùûňñǹńḿṁṃṅṇḷḹḥḩȯṏâ';
+            return diacriticChars.includes(char) || 
+                   char.includes('o͘') || 
+                   char.includes('a̍') || char.includes('e̍') || 
+                   char.includes('i̍') || char.includes('o̍') || 
+                   char.includes('u̍') || char.includes('ⁿ');
         }
         
         // 檔案上傳處理
