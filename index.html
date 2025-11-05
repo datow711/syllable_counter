@@ -381,7 +381,7 @@
             
             // 移除所有標點符號和全形空白用於音節計算
             const allPunctuations = /[。，、；：！？""''（）【】《》〈〉「」『』\/.,;:!?"'()\[\]{}<>　]/g;
-            text = text.replace(allPunctuations, '');
+            text = text.replace(allPunctuations, ' ');
             console.log('移除標點後:', text);
             
             // 移除分音節符號 -- 和單獨的 -（但保留羅馬拼音中的連字號）
