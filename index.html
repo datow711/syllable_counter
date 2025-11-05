@@ -16,7 +16,7 @@
             font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
         
         .container {
@@ -24,15 +24,25 @@
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 30px;
+            padding: 0px 20px 10px 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
+        }
+        
+        .main-layout {
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+        }
+        
+        .main-content {
+            flex: 3;
         }
         
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             font-size: 2.5rem;
             background: linear-gradient(45deg, #667eea, #764ba2);
             -webkit-background-clip: text;
@@ -43,9 +53,9 @@
         .upload-area {
             border: 3px dashed #667eea;
             border-radius: 15px;
-            padding: 40px;
+            padding: 20px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             transition: all 0.3s ease;
             background: rgba(102, 126, 234, 0.05);
         }
@@ -85,14 +95,14 @@
         
         .text-input {
             width: 100%;
-            min-height: 200px;
+            min-height: 100px;
             padding: 20px;
             border: 2px solid #ddd;
             border-radius: 15px;
             font-size: 16px;
             font-family: inherit;
             resize: vertical;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             transition: border-color 0.3s ease;
         }
         
@@ -121,18 +131,22 @@
         }
         
         .results {
+            flex: 2;
             background: rgba(255, 255, 255, 0.8);
             border-radius: 15px;
             padding: 25px;
-            margin-top: 20px;
             border: 1px solid #e0e0e0;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: sticky;
+            top: 30px;
         }
         
         .file-result {
             background: white;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
             border-left: 5px solid #667eea;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
@@ -140,19 +154,19 @@
         .file-name {
             font-weight: bold;
             color: #333;
-            margin-bottom: 10px;
-            font-size: 18px;
+            margin-bottom: 5px;
+            font-size: 16px;
         }
         
         .count-details {
-            margin-top: 10px;
+            margin-top: 5px;
         }
         
         .count-item {
             display: flex;
             justify-content: space-between;
-            margin: 5px 0;
-            padding: 5px 0;
+            margin: 2px 0;
+            padding: 2px 0;
         }
         
         .count-label {
@@ -163,7 +177,7 @@
         .count-value {
             font-weight: bold;
             color: #333;
-            font-size: 18px;
+            font-size: 16px;
         }
         
         .total-item {
@@ -174,32 +188,38 @@
         
         .total-item .count-value {
             color: #667eea;
-            font-size: 20px;
-        }
-        
-        .total-breakdown {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .total-breakdown .total-item {
             font-size: 18px;
-            padding: 8px 0;
         }
         
-        .grand-total {
-            font-size: 24px !important;
+        .total-table {
+            margin-top: 10px;
+        }
+
+        .total-table-header, .total-table-data {
+            display: flex;
+        }
+
+        .total-table-header div, .total-table-data div {
+            flex: 1;
+            padding: 4px;
+            text-align: center;
+        }
+
+        .total-table-header {
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .total-table-data {
+            font-size: 16px;
             font-weight: bold;
-            color: white;
-            border-top: 2px solid rgba(255,255,255,0.3);
         }
         
         .total-result {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border-radius: 15px;
-            padding: 25px;
+            padding: 15px 20px;
             text-align: center;
             margin-top: 20px;
         }
@@ -211,8 +231,8 @@
         .example {
             background: rgba(102, 126, 234, 0.1);
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
         }
         
         .example h3 {
@@ -244,52 +264,101 @@
             background: #d32f2f;
             transform: translateY(-1px);
         }
+
+        details {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            transition: all 0.3s ease;
+        }
+
+        details summary {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            outline: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details summary::before {
+            content: '▶';
+            margin-right: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        details[open] summary::before {
+            content: '▼';
+            transform: rotate(90deg);
+        }
+
+        details summary:hover {
+            color: #667eea;
+        }
+
+        details .example-content {
+            padding-top: 15px;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>台語音節計算器</h1>
-        
-        <div class="example">
-            <h3>使用說明與範例：</h3>
-            <div class="example-text">Hit隻ka-choa̍h雄雄chông--出-來。 → 音節：9、標點：1、總和：10</div>
-            <div class="example-text">Î-cheng驚kah peh起去椅仔大聲哀。 → 音節：12、標點：1、總和：13</div>
-            <div class="example-text">12ê囡仔leh thit-thô → 音節：8、標點：0、總和：8</div>
-            <div class="example-text">hiah gâu → 音節：2、標點：0、總和：2</div>
-            <div class="example-text">A-lâm → 音節：2、標點：0、總和：2</div>
-            <p style="margin-top: 10px; color: #666;">
-                • 漢字算一個音節<br>
-                • 羅馬拼音以連字號(-)分隔的每段算一個音節<br>
-                • 數字每個字符算一個音節<br>
-                • 標點符號單獨計算（不包含全形空白）<br>
-                • -- 和 - 是分音節符號，不計入字數<br>
-                • 最終結果顯示：音節數 + 標點數 = 總和
-            </p>
-        </div>
-        
-        <div class="upload-area" id="uploadArea">
-            <p style="font-size: 18px; color: #666; margin-bottom: 20px;">
-                拖放Word檔案到此處，或點擊按鈕選擇檔案
-            </p>
-            <button class="upload-button" onclick="document.getElementById('fileInput').click()">
-                選擇Word檔案
-            </button>
-            <input type="file" id="fileInput" class="file-input" multiple accept=".docx,.doc">
-        </div>
-        
-        <div>
-            <h3 style="margin-bottom: 15px; color: #333;">或直接輸入文字：</h3>
-            <textarea class="text-input" id="textInput" placeholder="在此輸入台語文字..."></textarea>
-            <button class="analyze-button" onclick="analyzeText()">分析音節數量</button>
-            <button class="clear-button" onclick="clearAll()">清除所有</button>
-        </div>
-        
-        <div id="results" class="results" style="display: none;">
-            <h3 style="margin-bottom: 20px; color: #333;">分析結果：</h3>
-            <div id="fileResults"></div>
-            <div id="totalResult" class="total-result">
-                <div style="font-size: 20px;">總計統計</div>
-                <div id="totalCount" class="total-count"></div>
+        <div class="main-layout">
+            <div class="main-content">
+                <details class="example">
+                    <summary>使用說明與範例</summary>
+                    <div class="example-content">
+                        <div class="example-text">Hit隻ka-choa̍h雄雄chông--出-來。 → 音節：9、標點：1、總和：10</div>
+                        <div class="example-text">Î-cheng驚kah peh起去椅仔大聲哀。 → 音節：12、標點：1、總和：13</div>
+                        <div class="example-text">12ê囡仔leh thit-thô → 音節：8、標點：0、總和：8</div>
+                        <div class="example-text">hiah gâu → 音節：2、標點：0、總和：2</div>
+                        <div class="example-text">A-lâm → 音節：2、標點：0、總和：2</div>
+                        <p style="margin-top: 10px; color: #666;">
+                            • 漢字算一個音節<br>
+                            • 羅馬拼音以連字號(-)分隔的每段算一個音節<br>
+                            • 數字每個字符算一個音節<br>
+                            • 標點符號單獨計算（不包含全形空白）<br>
+                            • -- 和 - 是分音節符號，不計入字數<br>
+                            • 最終結果顯示：音節數 + 標點數 = 總和
+                        </p>
+                    </div>
+                </details>
+                
+                <div class="upload-area" id="uploadArea">
+                    <p style="font-size: 18px; color: #666; margin-bottom: 20px;">
+                        拖放Word檔案到此處，或點擊按鈕選擇檔案
+                    </p>
+                    <button class="upload-button" onclick="document.getElementById('fileInput').click()">
+                        選擇Word檔案
+                    </button>
+                    <input type="file" id="fileInput" class="file-input" multiple accept=".docx,.doc">
+                </div>
+                
+                <div>
+                    <h3 style="margin-bottom: 15px; color: #333;">或直接輸入文字：</h3>
+                    <textarea class="text-input" id="textInput" placeholder="在此輸入台語文字..."></textarea>
+                    <button class="analyze-button" onclick="analyzeText()">分析音節數量</button>
+                    <button class="clear-button" onclick="clearAll()">清除所有</button>
+                </div>
+            </div>
+            
+            <div id="results" class="results">
+                <h3 style="margin-bottom: 20px; color: #333;">分析結果：</h3>
+                <div id="fileResults"></div>
+                <div id="totalResult" class="total-result" style="display: none;">
+                    <div style="font-size: 20px;">總計統計</div>
+                    <div id="totalCount" class="total-count"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -508,9 +577,21 @@
         function updateResults() {
             const resultsDiv = document.getElementById('results');
             const fileResultsDiv = document.getElementById('fileResults');
+            const totalResultDiv = document.getElementById('totalResult');
             const totalCountDiv = document.getElementById('totalCount');
             
             fileResultsDiv.innerHTML = '';
+            
+            if (fileResults.length === 0) {
+                fileResultsDiv.innerHTML = '<p style="color: #666; text-align: center;">尚無分析記錄。</p>';
+                totalResultDiv.style.display = 'none';
+                resultsDiv.querySelector('h3').style.display = 'none';
+                return;
+            }
+            
+            resultsDiv.querySelector('h3').style.display = 'block';
+            totalResultDiv.style.display = 'block';
+            
             let totalSyllables = 0;
             let totalPunctuation = 0;
             let grandTotal = 0;
@@ -544,13 +625,19 @@
             });
             
             totalCountDiv.innerHTML = `
-                <div class="total-breakdown">
-                    <div class="total-item">音節數：${totalSyllables}</div>
-                    <div class="total-item">標點數：${totalPunctuation}</div>
-                    <div class="total-item grand-total">總和：${grandTotal}</div>
+                <div class="total-table">
+                    <div class="total-table-header">
+                        <div>音節數</div>
+                        <div>標點數</div>
+                        <div>總和</div>
+                    </div>
+                    <div class="total-table-data">
+                        <div>${totalSyllables}</div>
+                        <div>${totalPunctuation}</div>
+                        <div>${grandTotal}</div>
+                    </div>
                 </div>
             `;
-            resultsDiv.style.display = fileResults.length > 0 ? 'block' : 'none';
         }
         
         // 移除單個結果
@@ -566,6 +653,8 @@
             document.getElementById('fileInput').value = '';
             updateResults();
         }
+
+        document.addEventListener('DOMContentLoaded', updateResults);
     </script>
 </body>
 </html>
