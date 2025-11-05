@@ -336,12 +336,12 @@
                 
                 <div class="upload-area" id="uploadArea">
                     <p style="font-size: 18px; color: #666; margin-bottom: 20px;">
-                        拖放Word檔案到此處，或點擊按鈕選擇檔案
+                        拖放 .docx 檔案到此處，或點擊按鈕選擇檔案
                     </p>
                     <button class="upload-button" onclick="document.getElementById('fileInput').click()">
-                        選擇Word檔案
+                        選擇Word檔案 (.docx)
                     </button>
-                    <input type="file" id="fileInput" class="file-input" multiple accept=".docx,.doc">
+                    <input type="file" id="fileInput" class="file-input" multiple accept=".docx">
                 </div>
                 
                 <div>
@@ -373,14 +373,14 @@
             const originalText = text;
             
             // 計算標點符號數量（排除全形空白和分音節符號）
-            const punctuationRegex = /[。，、；：！？""''（）【】《》〈〉「」『』.,;:!?"'()\[\]{}<>]/g;
+            const punctuationRegex = /[。，、；：！？""''（）【】《》〈〉「」『』\/.,;:!?"'()\[\]{}<>]/g;
             const punctuationMatches = originalText.match(punctuationRegex) || [];
             const punctuationCount = punctuationMatches.length;
             console.log('找到的標點符號:', punctuationMatches);
             console.log('標點符號數量:', punctuationCount);
             
             // 移除所有標點符號和全形空白用於音節計算
-            const allPunctuations = /[。，、；：！？""''（）【】《》〈〉「」『』.,;:!?"'()\[\]{}<>　]/g;
+            const allPunctuations = /[。，、；：！？""''（）【】《》〈〉「」『』\/.,;:!?"'()\[\]{}<>　]/g;
             text = text.replace(allPunctuations, '');
             console.log('移除標點後:', text);
             
@@ -525,7 +525,7 @@
         // 處理檔案
         async function handleFiles(files) {
             for (let file of files) {
-                if (file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
+                if (file.name.endsWith('.docx')) {
                     try {
                         const arrayBuffer = await file.arrayBuffer();
                         const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
@@ -545,7 +545,7 @@
                         alert(`處理檔案 ${file.name} 時發生錯誤: ${error.message}`);
                     }
                 } else {
-                    alert(`檔案 ${file.name} 不是支援的Word檔案格式`);
+                    alert(`檔案 ${file.name} 不是支援的 .docx 檔案格式`);
                 }
             }
         }
