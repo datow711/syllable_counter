@@ -408,30 +408,35 @@
                     }
                     // 檢查是否為羅馬字母開始的拼音
                     else if (isLatinChar(char)) {
-                        // 找到整個羅馬拼音單位的結束位置
-                        let romanEnd = i;
-                        while (romanEnd < word.length && 
-                               (isLatinChar(word[romanEnd]) || 
-                                isDiacritic(word[romanEnd]) || 
-                                word[romanEnd] === '-')) {
-                            romanEnd++;
+                        let pinyinEnd = i;
+                        // 找到羅馬字母、變音符號或連字號的連續序列
+                        while (pinyinEnd < word.length && 
+                               (isLatinChar(word[pinyinEnd]) || 
+                                isDiacritic(word[pinyinEnd]) || 
+                                word[pinyinEnd] === '-')) {
+                            pinyinEnd++;
                         }
-                        
-                        const romanText = word.substring(i, romanEnd);
+
+                        // 檢查緊跟在羅馬拼音後是否是數字（聲調符號）
+                        if (pinyinEnd < word.length && word[pinyinEnd] >= '0' && word[pinyinEnd] <= '9') {
+                            pinyinEnd++; // 將聲調數字也包含進去
+                        }
+
+                        const romanText = word.substring(i, pinyinEnd);
                         console.log('找到羅馬拼音:', romanText);
-                        
+
                         // 如果整個字串只是一個-，跳過
-                        if (romanText === '-') {
-                            i = romanEnd;
+                        if (romanText === '-' || romanText.trim() === '') {
+                            i = pinyinEnd;
                             continue;
                         }
-                        
+
                         // 計算羅馬拼音的音節數（以-分隔，但要排除空字串）
                         const parts = romanText.split('-').filter(part => part.length > 0);
                         console.log('羅馬拼音分割:', parts);
                         wordSyllables += parts.length;
-                        
-                        i = romanEnd;
+
+                        i = pinyinEnd;
                     }
                     // 檢查是否為數字
                     else if (char >= '0' && char <= '9') {
